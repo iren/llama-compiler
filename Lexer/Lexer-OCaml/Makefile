@@ -1,5 +1,4 @@
-# Makefile for the Llamma compiler
-# Last edit: 28-3-2012
+#llama-lexer
 
 OCAMLC_FLAGS=-g
 OCAMLC=ocamlc
@@ -13,7 +12,7 @@ OCAMLC=ocamlc
 %.cmo %.cmi: %.ml
 	$(OCAMLC) $(OCAMLC_FLAGS) -c $<
 
-spit: Lexer.cmo
+llama: Lexer.cmo
 	$(OCAMLC) $(OCAMLC_FLAGS) -o $@ $^
 
 Lexer.ml: Lexer.mll
@@ -25,4 +24,4 @@ clean:
 	$(RM) Lexer.ml *.cmo *.cmi *~
 
 distclean: clean
-	$(RM) spit
+	$(RM) llama
