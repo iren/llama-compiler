@@ -38,8 +38,8 @@
         | T_Divide      
         | T_Mod         
         | T_Flminus     
-        | T_Flplus      
-        | T_Fltimes     
+        | T_Flplus    
+        | T_Fltimes    
         | T_Fldivide    
         | T_Flpower     
         | T_Eq          
@@ -93,7 +93,7 @@ let hexpair  = (hexdigit)(hexdigit)*)
 let lowChar = ['a'-'z']
 let uppChar = ['A'-'Z']
 let idChar  = ['a'-'z''A'-'Z''0'-'9''_']
-let symChar = [' ' '!' '#' '$' '%' '^' '&' '*' '(' ')' '-' '=' '+' ':' ';' '[' '{' ']' '}' '|' ',' '<' '.' '>' '/' '?' '`' '~' '@']
+let symChar = [' ' '!' '#' '$' '%' '^' '&' '*' '(' ')' '-' '=' '+' ':' ';' '[' '}' ']' '{' '|' ',' '<' '.' '>' '/' '?' '`' '~' '@']
 let oneChar = symChar | idChar
 let squote   = '\''
                
@@ -184,22 +184,23 @@ rule lexer = parse
     | "'"(esc_seq|cmn_char)"'" { T_Char }
     | '"'(esc_seq|cmn_char)*'"' { T_Cstring }
     
+    
     | "(*"               { comments 0 lexbuf }
 
     | eof                { T_Eof }
-    |  _ as chr          { Printf.eprintf "invalid character: '%c' (ascii: %d)"
+    |  _ as chr          { Printf.eprintf "invalid character: '%c' (ascii: %d) \n"
                             chr (Char.code chr);
                             lexer lexbuf }
     
 and comments level = parse
-  | "*)"											{ if level = 0 then lexer lexbuf
-													  else comments (level-1) lexbuf }
-  | "(*"											{ comments (level+1) lexbuf }
-  | '\n'											{ incr ln_cnt; comments level lexbuf }
-  | _												{ comments level lexbuf }
-  | eof												{ error "Comments are not closed" }
-  | white                                           { lexer lexbuf }
-  | "'" [^ '\n']* "\n"                              { lexer lexbuf }
+     | "*)"											{ if level = 0 then lexer lexbuf
+                                                          else comments (level-1) lexbuf }
+     | "(*"											{ comments (level+1) lexbuf }
+     | '\n'											{ incr ln_cnt; comments level lexbuf }
+     | eof											{ error "Comments are not closed\n" }
+     | _										    { comments level lexbuf }
+     (*| white                                        { lexer lexbuf }
+     | "'" [^ '\n']* "\n"                           { lexer lexbuf }*)
 
 
 {
@@ -281,18 +282,17 @@ and comments level = parse
                                                           
                                                           
   let main () =                       
-      Printf.printf "tiiipota";
-      let fn =
+     (* let fn =
           if Array.length Sys.argv > 1
                 then open_in (Sys.argv.(1))
                 else stdin
-      in
-        let lexbuf = Lexing.from_channel fn in
-   (*   let lexbuf = Lexing.from_channxbuf = Lexirom_channel sel stdin in*)
+      in*)
+      Printf.eprintf "tiiipota";
+    (*    let lexbuf = Lexing.from_channel fn in
         let rec loop () =
             let token = lexer lexbuf in
                 Printf.printf "token=%s, lexeme=\"%s\"\n"
                     (string_of_token token) (Lexing.lexeme lexbuf);
                     if token <> T_Eof then loop () in
-        loop ()
+        loop ()*)
 }
