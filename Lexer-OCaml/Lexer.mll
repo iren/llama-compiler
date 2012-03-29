@@ -2,7 +2,7 @@
 (*                         llama-Lexer                         *)
 
 {
-    let ln_cnt = ref 0
+    let ln_cnt = ref 1
     
     type token =
         | T_Andfun      
@@ -183,16 +183,16 @@ rule lexer = parse
 
     
     | eof                       { T_Eof }
-    |  _ as chr                 { Printf.printf "invalid character: '%c' (ascii: %d) in line %d \n"
+    |  _ as chr                 { Printf.printf "Invalid character: '%c' (ascii: %d) in line %d \n"
                                     chr (Char.code chr) !ln_cnt;
-                                    lexer lexbuf }
+                                    exit 1 }
    
 and comments level = parse
     | "*)"						{ if level = 0 then lexer lexbuf
                                     else comments (level-1) lexbuf }
     | "(*"						{ comments (level+1) lexbuf }
     | eol						{ incr ln_cnt; comments level lexbuf }
-    | eof						{ error "Comments are not closed\n" }
+    | eof						{ decr ln_cnt; error "Comments are not closed\n" }
     | _							{ comments level lexbuf }
 
 

@@ -1,6 +1,6 @@
 # 4 "Lexer.mll"
  
-    let ln_cnt = ref 0
+    let ln_cnt = ref 1
     
     type token =
         | T_Andfun      
@@ -2743,9 +2743,9 @@ let
 # 2744 "Lexer.ml"
 = Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
 # 186 "Lexer.mll"
-                                ( Printf.printf "invalid character: '%c' (ascii: %d) in line %d \n"
+                                ( Printf.printf "Invalid character: '%c' (ascii: %d) in line %d \n"
                                     chr (Char.code chr) !ln_cnt;
-                                    lexer lexbuf )
+                                    exit 1 )
 # 2750 "Lexer.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; __ocaml_lex_lexer_rec lexbuf __ocaml_lex_state
@@ -2772,7 +2772,7 @@ and __ocaml_lex_comments_rec level lexbuf __ocaml_lex_state =
 
   | 3 ->
 # 195 "Lexer.mll"
-               ( error "Comments are not closed\n" )
+               ( decr ln_cnt; error "Comments are not closed\n" )
 # 2777 "Lexer.ml"
 
   | 4 ->
