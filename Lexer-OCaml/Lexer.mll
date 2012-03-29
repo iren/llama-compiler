@@ -181,8 +181,8 @@ rule lexer = parse
     | ")"                { T_Rparen     }
     | ":"                { T_Colon      }
     | ","                { T_Comma      }
-(*    | "'"(esc_seq|common_char)"'" { }
-    | '"'(esc_seq|common_char)*'"' { }*)
+    | "'"(esc_seq|cmn_char)"'" { T_Char }
+    | '"'(esc_seq|cmn_char)*'"' { T_Cstring }
     
     | "(*"               { comments 0 lexbuf }
 
@@ -198,8 +198,8 @@ and comments level = parse
   | '\n'											{ incr ln_cnt; comments level lexbuf }
   | _												{ comments level lexbuf }
   | eof												{ error "Comments are not closed" }
-  | white+               { lexer lexbuf }
-  | "'" [^ '\n']* "\n"   { lexer lexbuf }
+  | white                                           { lexer lexbuf }
+  | "'" [^ '\n']* "\n"                              { lexer lexbuf }
 
 
 {
@@ -281,6 +281,7 @@ and comments level = parse
                                                           
                                                           
   let main () =                       
+      Printf.printf "tiiipota";
       let fn =
           if Array.length Sys.argv > 1
                 then open_in (Sys.argv.(1))
