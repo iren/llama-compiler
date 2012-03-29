@@ -1,5 +1,8 @@
+(*Lydia Zakynthinou (03108024) & Vlassi-Pandi Eirini (03108137)*)
+(*                         llama-Lexer                         *)
+
 {
-    let ln_cnt = ref 1
+    let ln_cnt = ref 0
     
     type token =
         | T_Andfun      
@@ -79,9 +82,9 @@
     let error error_string = 
 	    Printf.eprintf "ERROR,line %d: %s\n"  !ln_cnt error_string ; exit 1
     
-    let fileP () = if Array.length Sys.argv > 0
+(*    let fileP () = if Array.length Sys.argv > 0
         then Sys.argv.(1)
-        else "<stdin>"
+        else "<stdin>"*)
 }
 
 let digit    = ['0'-'9']
@@ -93,16 +96,15 @@ let hexpair  = (hexdigit)(hexdigit)*)
 let lowChar = ['a'-'z']
 let uppChar = ['A'-'Z']
 let idChar  = ['a'-'z''A'-'Z''0'-'9''_']
-let symChar = [' ' '!' '#' '$' '%' '^' '&' '*' '(' ')' '-' '=' '+' ':' ';' '[' '}' ']' '{' '|' ',' '<' '.' '>' '/' '?' '`' '~' '@']
+let symChar = [' ''\\' ''' '!' '#' '$' '%' '^' '&' '*' '(' ')' '-' '=' '+' ':' ';' '[' '}' ']' '{' '|' ',' '<' '.' '>' '/' '?' '`' '~' '@']
 let oneChar = symChar | idChar
-let squote   = '\''
                
 let genid    = lowChar idChar*
 let conid    = uppChar idChar*
 
 let white    = [' ''\t']+
 let eol      = ['\r''\n']|"\r\n"
-let esc_seq  = ("\\n") | "\\t" | "\\r" | "\\0" | "\\\\" | "\\'" | "\\\"" |("\\x"['0'-'9''a'-'f''A'-'F']['0'-'9''a'-'f''A'-'F'])
+let esc_seq  = ("\\n") | "\\t" | "\\r" | "\\0" | "\\\\" | "\\'" |"\\\"" | ("\\x"['0'-'9''a'-'f''A'-'F']['0'-'9''a'-'f''A'-'F'])
 let cmn_char = ['\x20'-'\x21'  '\x23'-'\x26' '\x28'-'\x5b' '\x5d'-'\x7e' '\x80'-'\xaf' '\xe0'-'\xf0']
 
 rule lexer = parse
@@ -147,8 +149,8 @@ rule lexer = parse
     | genid              { T_Genid }
 
     | white              { lexer lexbuf } 
-    | '\n'               { incr ln_cnt; lexer lexbuf }
-    | "--"[^'\n']*       { incr ln_cnt; lexer lexbuf }
+    | eol                { incr ln_cnt; lexer lexbuf }
+    | "--"[^'\n']* "\n"  { incr ln_cnt; lexer lexbuf }
     | "+"                { T_Plus       }
     | "-"                { T_Minus      }
     | "*"                { T_Times      }
@@ -181,22 +183,23 @@ rule lexer = parse
     | ")"                { T_Rparen     }
     | ":"                { T_Colon      }
     | ","                { T_Comma      }
-    | "'"(esc_seq|cmn_char)"'" { T_Char }
-    | '"'(esc_seq|cmn_char)*'"' { T_Cstring }
+    | "'"(oneChar)"'"    { T_Char }
+    | '"'(oneChar)*'"'   { T_Cstring }
     
     
     | "(*"               { comments 0 lexbuf }
 
+    
     | eof                { T_Eof }
-    |  _ as chr          { Printf.eprintf "invalid character: '%c' (ascii: %d) \n"
+    |  _ as chr          { Printf.printf "invalid character: '%c' (ascii: %d) \n"
                             chr (Char.code chr);
                             lexer lexbuf }
-    
+   
 and comments level = parse
      | "*)"											{ if level = 0 then lexer lexbuf
                                                           else comments (level-1) lexbuf }
      | "(*"											{ comments (level+1) lexbuf }
-     | '\n'											{ incr ln_cnt; comments level lexbuf }
+     | eol											{ incr ln_cnt; comments level lexbuf }
      | eof											{ error "Comments are not closed\n" }
      | _										    { comments level lexbuf }
      (*| white                                        { lexer lexbuf }
@@ -282,17 +285,18 @@ and comments level = parse
                                                           
                                                           
   let main () =                       
-     (* let fn =
+      let fn =
           if Array.length Sys.argv > 1
                 then open_in (Sys.argv.(1))
                 else stdin
-      in*)
-      Printf.eprintf "tiiipota";
-    (*    let lexbuf = Lexing.from_channel fn in
+      in
+        let lexbuf = Lexing.from_channel fn in
         let rec loop () =
             let token = lexer lexbuf in
                 Printf.printf "token=%s, lexeme=\"%s\"\n"
                     (string_of_token token) (Lexing.lexeme lexbuf);
                     if token <> T_Eof then loop () in
-        loop ()*)
+        loop ()
+
+  let _ = main ();
 }
