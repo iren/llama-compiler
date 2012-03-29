@@ -1,0 +1,134 @@
+(* 26-Mar-2012
+ * An OCaml implementation for Llama
+ *)
+{
+    open Lexing
+}
+
+let digit       =['0'-'9'];
+let hexdigit    =['0'-'9''a'-'f''A'-'F'];
+let intnum      =['0'-'9']+;
+let floatnum    ={intnum}\.{intnum}((e|E)(\+|\-)?{intnum});
+let hexpair     ={hexdigit}{2};
+
+let lowChar     =[a-z];
+let uppChar     =[A-Z];
+let idChar      =[a-zA-Z_0-9];
+let allchar     =\\[ntr0\\']|"\x"{hexpair};
+
+let genid       ={lowChar}{idChar}*;
+let conid       ={uppChar}{idChar}*;
+
+let constchar   ='{allchar}|\"';
+let conststr    =\"{allchar}*\";
+
+let ws          =[\ \t]+;
+let eol         =\n|("\013\010"|"\010"|"\013");
+
+
+%%
+<INITIAL>"and"       => (Tokens.ANDCOMB( !lineNum, yypos + 3));
+<INITIAL>"in"        => (Tokens.IN(      !lineNum, yypos + 2));
+<INITIAL>"let"       => (Tokens.LET(     !lineNum, yypos + 3));
+<INITIAL>"rec"       => (Tokens.REC(     !lineNum, yypos + 3));
+
+<INITIAL>"array"     => (Tokens.ARRAY(   !lineNum, yypos + 5));
+<INITIAL>"dim"       => (Tokens.DIM(     !lineNum, yypos + 3));
+
+<INITIAL>"begin"     => (Tokens.BEGIN(   !lineNum, yypos + 5));
+<INITIAL>"end"       => (Tokens.END(     !lineNum, yypos + 3));
+
+<INITIAL>"delete"    => (Tokens.DELETE(  !lineNum, yypos + 6));
+<INITIAL>"new"       => (Tokens.NEW(     !lineNum, yypos + 3));
+
+<INITIAL>"do"        => (Tokens.DO(      !lineNum, yypos + 2));
+<INITIAL>"done"      => (Tokens.DONE(    !lineNum, yypos + 4));
+<INITIAL>"downto"    => (Tokens.DOWNTO(  !lineNum, yypos + 6));
+<INITIAL>"for"       => (Tokens.FOR(     !lineNum, yypos + 3));
+<INITIAL>"to"        => (Tokens.TO(      !lineNum, yypos + 2));
+<INITIAL>"while"     => (Tokens.WHILE(   !lineNum, yypos + 5));
+
+<INITIAL>"else"      => (Tokens.ELSE(    !lineNum, yypos + 4));
+<INITIAL>"if"        => (Tokens.IF(      !lineNum, yypos + 2));
+<INITIAL>"then"      => (Tokens.THEN(    !lineNum, yypos + 4));
+
+<INITIAL>"match"     => (Tokens.MATCH(   !lineNum, yypos + 5));
+<INITIAL>"with"      => (Tokens.WITH(    !lineNum, yypos + 4));
+
+<INITIAL>"mutable"   => (Tokens.MUTABLE( !lineNum, yypos + 7));
+<INITIAL>"ref"       => (Tokens.REF(     !lineNum, yypos + 3));
+
+<INITIAL>"of"        => (Tokens.OF(      !lineNum, yypos + 2));
+<INITIAL>"type"      => (Tokens.TYPE(    !lineNum, yypos + 4));
+
+<INITIAL>"bool"      => (Tokens.TBOOL(   !lineNum, yypos + 4));
+<INITIAL>"char"      => (Tokens.TCHAR(   !lineNum, yypos + 4));
+<INITIAL>"float"     => (Tokens.TFLOAT(  !lineNum, yypos + 5));
+<INITIAL>"int"       => (Tokens.TINT(    !lineNum, yypos + 3));
+<INITIAL>"unit"      => (Tokens.TUNIT(   !lineNum, yypos + 4));
+
+<INITIAL>"-"         => (Tokens.MINUS(   !lineNum, yypos + 1));
+<INITIAL>"+"         => (Tokens.PLUS(    !lineNum, yypos + 1));
+<INITIAL>"*"         => (Tokens.TIMES(   !lineNum, yypos + 1));
+<INITIAL>"/"         => (Tokens.DIVIDE(  !lineNum, yypos + 1));
+<INITIAL>"mod"       => (Tokens.MOD(     !lineNum, yypos + 3));
+
+<INITIAL>"-."        => (Tokens.FLMINUS( !lineNum, yypos + 2));
+<INITIAL>"+."        => (Tokens.FLPLUS(  !lineNum, yypos + 2));
+<INITIAL>"*."        => (Tokens.FLTIMES( !lineNum, yypos + 2));
+<INITIAL>"/."        => (Tokens.FLDIVIDE(!lineNum, yypos + 2));
+<INITIAL>"**"        => (Tokens.FLPOWER( !lineNum, yypos + 2));
+
+<INITIAL>">="        => (Tokens.GE(      !lineNum, yypos + 2));
+<INITIAL>"<="        => (Tokens.LE(      !lineNum, yypos + 2));
+<INITIAL>">"         => (Tokens.GT(      !lineNum, yypos + 1));
+<INITIAL>"<"         => (Tokens.LT(      !lineNum, yypos + 1));
+<INITIAL>"<>"        => (Tokens.NEQ(     !lineNum, yypos + 2));
+<INITIAL>"="         => (Tokens.EQ(      !lineNum, yypos + 1));
+
+<INITIAL>"=="        => (Tokens.NATEQ(   !lineNum, yypos + 2));       
+<INITIAL>"!="        => (Tokens.NATNEQ(  !lineNum, yypos + 2));
+
+<INITIAL>"not"       => (Tokens.NOT(     !lineNum, yypos + 3));
+<INITIAL>"&&"        => (Tokens.AND(     !lineNum, yypos + 3));
+<INITIAL>"||"        => (Tokens.OR(      !lineNum, yypos + 2));
+
+<INITIAL>":="        => (Tokens.ASSIGN(  !lineNum, yypos + 2));
+<INITIAL>"!"         => (Tokens.BANG(    !lineNum, yypos + 1));
+
+<INITIAL>";"         => (Tokens.SEMICOLON(   yypos, yypos + 1));       
+<INITIAL>"|"         => (Tokens.SOUVLAKI(!lineNum, yypos + 1));       
+<INITIAL>"->"        => (Tokens.GIVES(   !lineNum, yypos + 2));       
+
+<INITIAL>"["         => (Tokens.LBRACK(  !lineNum, yypos + 1));       
+<INITIAL>"]"         => (Tokens.RBRACK(  !lineNum, yypos + 1));       
+<INITIAL>"("         => (Tokens.LPAREN(  !lineNum, yypos + 1));       
+<INITIAL>")"         => (Tokens.RPAREN(  !lineNum, yypos + 1));       
+<INITIAL>":"         => (Tokens.COLON(   !lineNum, yypos + 1));       
+<INITIAL>","         => (Tokens.COMMA(   !lineNum, yypos + 1));       
+
+<INITIAL>"true"      => (Tokens.BOOL(yytext,  !lineNum, yypos + 4));
+<INITIAL>"false"     => (Tokens.BOOL(yytext,  !lineNum, yypos + 5));
+
+<INITIAL>{conid}     => (Tokens.CONID(   yytext, !lineNum, yypos + size yytext));
+<INITIAL>{genid}     => (Tokens.GENID(   yytext, !lineNum, yypos + size yytext));
+
+<INITIAL>{floatnum}  => (Tokens.FLOAT(   yytext, !lineNum, yypos + size yytext));
+<INITIAL>{intnum}    => (Tokens.INT(     yytext, !lineNum, yypos + size yytext));
+<INITIAL>"()"        => (Tokens.UNIT(    yytext, !lineNum, yypos + 2));
+
+<INITIAL>\"          => (YYBEGIN STRING; continue());
+<STRING>{allchar}*   => (Tokens.CSTRING(yytext, !lineNum, yypos + size yytext));
+<STRING>\"           => (YYBEGIN INITIAL; continue());
+<STRING>             => (ErrorMsg.error yypos ("Unclosed string: " ^ Int.toString(!lineNum));
+                             YYBEGIN INITIAL; continue()
+                        );
+
+<INITIAL>"--"   => (YYBEGIN SCOMMENT; continue());
+<SCOMMENT>.     => (continue());
+<SCOMMENT>{eol} => (inc lineNum; YYBEGIN INITIAL; continue()); 
+
+{ws}+       => (linePos := yypos :: (!linePos); continue());
+{eol}	    => (inc lineNum; linePos := yypos :: (!linePos); continue());
+
+.           => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());
